@@ -1,6 +1,6 @@
 # cron
 
-* [![Build Status](https://travis-ci.org/treydock/puppet-cron.png)](https://travis-ci.org/treydock/puppet-cron)
+* ![Build Status](https://travis-ci.org/treydock/puppet-cron.png)
 
 This is the cron Puppet module.
 
