@@ -1,5 +1,7 @@
 # cron
 
+[![Build Status](https://travis-ci.org/treydock/puppet-cron.png)](https://travis-ci.org/treydock/puppet-cron)
+
 This is the cron Puppet module.
 
 ## Support
