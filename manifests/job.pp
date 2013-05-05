@@ -44,6 +44,10 @@
 #   See Puppetlabs documentation
 #    http://docs.puppetlabs.com/references/sjoble/type.html#cron
 #
+# [*run_part*]
+#   Boolean, that when true will create the directory listed in
+#   the command parameter if the command begins with 'run-part'
+#   Default: false
 #
 # === Examples
 #
@@ -84,15 +88,14 @@ define cron::job (
   $month      = undef,
   $monthday   = undef,
   $weekday    = undef,
-  $special    = undef
+  $special    = undef,
+  $run_part   = false
 ) {
 
-  include cron
+  include cron::params
 
-  $crond_package = $cron::crond_package
-
-  if $command =~ /^run-part.*/ {
-    $run_part_dir = inline_template('<%= @command[/^run-part\s+(.*)$/, 1] %>')
+  if $command =~ /^run-part\s.*/ {
+    $run_part_dir   = inline_template('<%= @command[/^run-part\s+(.*)$/, 1] %>')
   }
 
   cron { $name:
@@ -105,10 +108,12 @@ define cron::job (
     monthday  => $monthday,
     weekday   => $weekday,
     special   => $special,
-    require   => Package[$crond_package],
+    require   => Package[$cron::params::cron_package_name],
   }
 
-  if $run_part_dir and $ensure =~ /present/ {
+  if $run_part_dir and $ensure =~ /present/ and $run_part {
+    validate_absolute_path($run_part_dir)
+
     file { $run_part_dir:
       ensure  => directory,
     }

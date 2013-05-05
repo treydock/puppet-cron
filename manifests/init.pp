@@ -36,35 +36,36 @@
 # Copyright 2013 Trey Dockendorf
 #
 class cron (
-  $crond_args     = '',
+  $crond_args     = $cron::params::crond_args,
   $job_instances  = $cron::params::job_instances
 ) {
 
   include cron::params
 
-  $crond_package = $cron::params::crond_package
-  $crond_service = $cron::params::crond_service
 
-  package { $crond_package:
-    ensure  => installed,
+
+  if ! defined(Package[$cron::params::cron_package_name]) {
+    package { $cron::params::cron_package_name:
+      ensure  => installed,
+    }
   }
 
   service { 'crond':
     ensure      => running,
     enable      => true,
-    name        => $crond_service,
-    hasstatus   => true,
-    hasrestart  => true,
-    require     => Package[$crond_package],
+    name        => $cron::params::cron_service_name,
+    hasstatus   => $cron::params::cron_service_hasstatus,
+    hasrestart  => $cron::params::cron_service_hasrestart,
+    require     => Package[$cron::params::cron_package_name],
   }
 
-  file { '/etc/sysconfig/crond':
+  file { $cron::params::cron_service_conf:
     ensure    => present,
-    content   => template('cron/crond.sysconfig.erb'),
+    content   => template($cron::params::cron_service_conf_template),
     owner     => 'root',
     group     => 'root',
     mode      => '0644',
-    require   => Package[$crond_package],
+    require   => Package[$cron::params::cron_package_name],
     notify    => Service['crond'],
   }
 

@@ -2,6 +2,11 @@
 #
 # The cron configuration settings.
 #
+# === Variables
+#
+# [*cron_job_instances*]
+#   A Hash that defines cron::job resources
+#
 # === Authors
 #
 # Trey Dockendorf <treydock@gmail.com>
@@ -12,18 +17,23 @@
 #
 class cron::params {
 
-  $job_instances          = $::cron_job_instances ? {
+  $job_instances                   = $::cron_job_instances ? {
     undef   => false,
     default => $::cron_job_instances,
   }
 
   case $::osfamily {
     'RedHat': {
-      $crond_package      = $::operatingsystemrelease ? {
+      $cron_package_name           = $::operatingsystemrelease ? {
         /5.\d/ => 'vixie-cron',
         /6.\d/ => 'cronie',
       }
-      $crond_service      = 'crond'
+      $cron_service_name           = 'crond'
+      $cron_service_hasstatus      = true
+      $cron_service_hasrestart     = true
+      $cron_service_conf           = '/etc/sysconfig/crond'
+      $cron_service_conf_template  = 'cron/crond.sysconfig.erb'
+      $crond_args                  = ''
     }
 
     default: {
