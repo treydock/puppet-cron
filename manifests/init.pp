@@ -38,11 +38,7 @@
 class cron (
   $crond_args     = $cron::params::crond_args,
   $job_instances  = $cron::params::job_instances
-) {
-
-  include cron::params
-
-
+) inherits cron::params {
 
   if ! defined(Package[$cron::params::cron_package_name]) {
     package { $cron::params::cron_package_name:

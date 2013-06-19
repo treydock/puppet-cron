@@ -1,10 +1,10 @@
 require 'spec_helper'
 
 describe 'cron' do
-  include_context :default_parameters
+  include_context :defaults
 
   let :facts do
-    RSpec.configuration.default_facts.merge({
+    default_facts.merge({
 
     })
   end
@@ -48,7 +48,7 @@ describe 'cron' do
 
   context 'EL5 contains vixie-cron' do
     let :facts do
-      RSpec.configuration.default_facts.merge({
+      default_facts.merge({
         :operatingsystemrelease => '5.9'
       })
     end

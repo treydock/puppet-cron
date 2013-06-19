@@ -1,10 +1,10 @@
 require 'spec_helper'
 
 describe 'cron::job' do
-  include_context :default_parameters
+  include_context :defaults
 
   let :facts do
-    RSpec.configuration.default_facts.merge({
+    default_facts.merge({
 
     })
   end
