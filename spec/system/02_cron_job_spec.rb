@@ -1,14 +1,16 @@
 require 'spec_helper_system'
 
-describe 'cron class:' do
-  context puppet_agent do
-    its(:stderr) { should be_empty }
-    its(:exit_code) { should_not == 1 }
-  end
-
+describe 'cron::job define:' do
   context 'should run successfully' do
-    pp = "class { 'cron': }"
+    pp = <<-EOS
+class { 'cron': }
+cron::job { 'logrotate':
+  command     => '/usr/sbin/logrotate',
+  user        => 'root',
+  hour        => '1',
+}
 
+EOS
 
     context puppet_apply(pp) do
       its(:stderr) { should be_empty }
@@ -17,5 +19,9 @@ describe 'cron class:' do
       its(:stderr) { should be_empty }
       its(:exit_code) { should be_zero }
     end
+  end
+
+  describe cron do
+    it { should have_entry('* 1 * * * /usr/sbin/logrotate').with_user('root') }
   end
 end

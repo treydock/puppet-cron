@@ -3,11 +3,7 @@ require 'spec_helper'
 describe 'cron::job' do
   include_context :defaults
 
-  let :facts do
-    default_facts.merge({
-
-    })
-  end
+  let(:facts) { default_facts }
 
   shared_context :cron_job_shared do
     it { should include_class('cron::params') }
@@ -16,10 +12,7 @@ describe 'cron::job' do
   shared_context :cron_job_5min_shared do
     include_context :cron_job_shared
 
-    let :title do
-      'cron.5min'
-    end
-
+    let(:title) { 'cron.5min' }
 
     it do
       should contain_cron('cron.5min').with(cron_default_parameters.merge({
@@ -47,9 +40,7 @@ describe 'cron::job' do
   end
 
   context 'with command => "run-part etc/cron.5min" using invalid path and run_part => true' do
-    let :title do
-      'cron.5min'
-    end
+    let(:title) { 'cron.5min' }
 
     let :params do
       {
@@ -80,9 +71,7 @@ describe 'cron::job' do
   context 'with command => /usr/sbin/logrotate' do
     include_context :cron_job_shared
 
-    let :title do
-      'logrotate'
-    end
+    let(:title) { 'logrotate' }
 
     let :params do
       {
@@ -105,9 +94,7 @@ describe 'cron::job' do
   context 'with name as command' do
     include_context :cron_job_shared
 
-    let :title do
-      '/usr/sbin/raid-check'
-    end
+    let(:title) { '/usr/sbin/raid-check' }
 
     let :params do
       {

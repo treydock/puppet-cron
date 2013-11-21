@@ -36,38 +36,67 @@
 # Copyright 2013 Trey Dockendorf
 #
 class cron (
-  $crond_args     = $cron::params::crond_args,
-  $job_instances  = $cron::params::job_instances
+  $crond_args               = $cron::params::crond_args,
+  $package_name             = $cron::params::package_name,
+  $service_ensure           = 'running',
+  $service_enable           = true,
+  $service_autorestart      = true,
+  $service_config_path      = $cron::params::service_config_path,
+  $service_config_template  = $cron::params::service_config_template,
+  $service_name             = $cron::params::service_name,
+  $service_hasstatus        = $cron::params::service_hasstatus,
+  $service_hasrestart       = $cron::params::service_hasrestart,
+  $job_instances            = $cron::params::job_instances
 ) inherits cron::params {
 
-  if ! defined(Package[$cron::params::cron_package_name]) {
-    package { $cron::params::cron_package_name:
-      ensure  => installed,
-    }
+  validate_bool($service_autorestart)
+
+  # This gives the option to not manage the service 'ensure' state.
+  $service_ensure_real  = $service_ensure ? {
+    /UNSET|undef/ => undef,
+    default       => $service_ensure,
+  }
+
+  # This gives the option to not manage the service 'enable' state.
+  $service_enable_real  = $service_enable ? {
+    /UNSET|undef/ => undef,
+    default       => $service_enable,
+  }
+
+  $service_subscribe = $service_autorestart ? {
+    true  => File['/etc/sysconfig/crond'],
+    false => undef,
+  }
+
+  package { 'cron':
+    ensure  => present,
+    name    => $package_name,
+    before  => File['/etc/sysconfig/crond'],
   }
 
   service { 'crond':
-    ensure      => running,
-    enable      => true,
-    name        => $cron::params::cron_service_name,
-    hasstatus   => $cron::params::cron_service_hasstatus,
-    hasrestart  => $cron::params::cron_service_hasrestart,
-    require     => Package[$cron::params::cron_package_name],
+    ensure      => $service_ensure,
+    enable      => $service_enable,
+    name        => $service_name,
+    hasstatus   => $service_hasstatus,
+    hasrestart  => $service_hasrestart,
+    subscribe   => $service_subscribe,
   }
 
-  file { $cron::params::cron_service_conf:
+  file { '/etc/sysconfig/crond':
     ensure    => present,
-    content   => template($cron::params::cron_service_conf_template),
+    path      => $service_config_path,
+    content   => template($service_config_template),
     owner     => 'root',
     group     => 'root',
     mode      => '0644',
-    require   => Package[$cron::params::cron_package_name],
-    notify    => Service['crond'],
   }
 
   if $job_instances {
-    validate_hash($job_instances)
-    create_resources('cron::job', $job_instances)
+#    if ! empty($job_instances) {
+      validate_hash($job_instances)
+      create_resources('cron::job', $job_instances)
+#    }
   }
 
 }

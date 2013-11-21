@@ -108,7 +108,7 @@ define cron::job (
     monthday  => $monthday,
     weekday   => $weekday,
     special   => $special,
-    require   => Package[$cron::params::cron_package_name],
+    require   => Package['cron'],
   }
 
   if $run_part_dir and $ensure =~ /present/ and $run_part {

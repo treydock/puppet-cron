@@ -3,21 +3,18 @@ require 'spec_helper'
 describe 'cron' do
   include_context :defaults
 
-  let :facts do
-    default_facts.merge({
+  let(:facts) { default_facts }
 
-    })
-  end
-
-  it { should include_class('cron::params') }
+  it { should create_class('cron') }
+  it { should contain_class('cron::params') }
 
   it do
-    should contain_package('cronie').with({
-      'ensure'  => 'installed',
+    should contain_package('cron').with({
+      'ensure'  => 'present',
+      'name'    => 'cronie',
+      'before'  => 'File[/etc/sysconfig/crond]',
     })
   end
-
-  it { should_not contain_package('vixie-cron') }
 
   it do
     should contain_service('crond').with({
@@ -26,51 +23,32 @@ describe 'cron' do
       'name'        => 'crond',
       'hasstatus'   => 'true',
       'hasrestart'  => 'true',
-      'require'     => 'Package[cronie]',
+      'subscribe'   => 'File[/etc/sysconfig/crond]',
     })
   end
 
   it do
     should contain_file('/etc/sysconfig/crond').with({
       'ensure'    => 'present',
+      'path'      => '/etc/sysconfig/crond',
       'owner'     => 'root',
       'group'     => 'root',
       'mode'      => '0644',
-      'require'   => 'Package[cronie]',
-      'notify'    => 'Service[crond]',
     })
   end
 
   it do
-    should contain_file('/etc/sysconfig/crond') \
-      .with_content(/^CRONDARGS=$/)
+    content = subject.resource('file', '/etc/sysconfig/crond').send(:parameters)[:content]
+    content.split("\n").reject { |c| c =~ /(^#|^$)/ }.should == [
+      'CRONDARGS=',
+    ]
   end
 
+  it { should have_cron__job_resource_count(0) }
+
   context 'EL5 contains vixie-cron' do
-    let :facts do
-      default_facts.merge({
-        :operatingsystemrelease => '5.9'
-      })
-    end
-
-    it do
-      should contain_package('vixie-cron').with({
-        'ensure'  => 'installed',
-      })
-    end
-
-    it { should_not contain_package('cronie') }
-
-    it do
-      should contain_file('/etc/sysconfig/crond').with({
-        'ensure'    => 'present',
-        'owner'     => 'root',
-        'group'     => 'root',
-        'mode'      => '0644',
-        'require'   => 'Package[vixie-cron]',
-        'notify'    => 'Service[crond]',
-      })
-    end
+    let(:facts) { default_facts.merge({ :operatingsystemrelease => '5.9' }) }
+    it { should contain_package('cron').with_name('vixie-cron') }
   end
 
   context 'with job_instances => defined' do
@@ -95,16 +73,19 @@ describe 'cron' do
     end
   end
 
+  context 'with job_instances => {}' do
+    let(:params) {{ :job_instances  => {} }}
+    it { should have_cron__job_resource_count(0) }
+  end
+
   context 'with crond_args => foo' do
-    let :params do
-      {
-        :crond_args => 'foo',
-      }
-    end
+    let(:params) {{ :crond_args => 'foo' }}
 
     it do
-      should contain_file('/etc/sysconfig/crond') \
-        .with_content(/^CRONDARGS=foo$/)
+      content = subject.resource('file', '/etc/sysconfig/crond').send(:parameters)[:content]
+      content.split("\n").reject { |c| c =~ /(^#|^$)/ }.should == [
+        'CRONDARGS=foo',
+      ]
     end
   end
 end
