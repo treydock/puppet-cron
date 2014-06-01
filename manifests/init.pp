@@ -46,10 +46,14 @@ class cron (
   $service_name             = $cron::params::service_name,
   $service_hasstatus        = $cron::params::service_hasstatus,
   $service_hasrestart       = $cron::params::service_hasrestart,
+  $cron_allow               = [],
+  $cron_deny                = [],
   $job_instances            = $cron::params::job_instances
 ) inherits cron::params {
 
   validate_bool($service_autorestart)
+  validate_array($cron_allow)
+  validate_array($cron_deny)
 
   # This gives the option to not manage the service 'ensure' state.
   $service_ensure_real  = $service_ensure ? {
@@ -92,11 +96,31 @@ class cron (
     mode      => '0644',
   }
 
+  if empty($cron_allow) {
+    file { '/etc/cron.allow':
+      ensure  => 'absent',
+    }
+  } else {
+    file { '/etc/cron.allow':
+      ensure  => 'file',
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0600',
+      content => template('cron/cron.allow.erb'),
+    }
+  }
+
+  file { '/etc/cron.deny':
+    ensure  => 'file',
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0600',
+    content => template('cron/cron.deny.erb'),
+  }
+
   if $job_instances {
-#    if ! empty($job_instances) {
-      validate_hash($job_instances)
-      create_resources('cron::job', $job_instances)
-#    }
+    validate_hash($job_instances)
+    create_resources('cron::job', $job_instances)
   }
 
 }

@@ -48,5 +48,5 @@ This is could also be a way to define cron jobs from an ENC.
 ### Running tests
 
 1. To install dependencies run `bundle install`
-2. Run tests using `rake spec:all`
+2. Run tests using `rake test`
 

@@ -6,7 +6,7 @@ describe 'cron::job' do
   let(:facts) { default_facts }
 
   shared_context :cron_job_shared do
-    it { should include_class('cron::params') }
+    it { should contain_class('cron::params') }
   end
 
   shared_context :cron_job_5min_shared do
@@ -51,7 +51,7 @@ describe 'cron::job' do
       }
     end
 
-    it { expect { should include_class('cron::params') }.to raise_error(Puppet::Error, /is not an absolute path./) }
+    it { expect { should contain_class('cron::params') }.to raise_error(Puppet::Error, /is not an absolute path./) }
   end
 
   context 'with command => "run-part /etc/cron.5min"' do

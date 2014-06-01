@@ -38,10 +38,26 @@ describe 'cron' do
   end
 
   it do
-    content = subject.resource('file', '/etc/sysconfig/crond').send(:parameters)[:content]
+    content = catalogue.resource('file', '/etc/sysconfig/crond').send(:parameters)[:content]
     content.split("\n").reject { |c| c =~ /(^#|^$)/ }.should == [
       'CRONDARGS=',
     ]
+  end
+
+  it { should contain_file('/etc/cron.allow').with_ensure('absent') }
+
+  it do
+    should contain_file('/etc/cron.deny').with({
+      :ensure => 'file',
+      :owner  => 'root',
+      :group  => 'root',
+      :mode   => '0600',
+    })
+  end
+
+  it "should contain /etc/cron.deny with no content" do
+    content = catalogue.resource('file', '/etc/cron.deny').send(:parameters)[:content]
+    content.split("\n").reject { |c| c =~ /(^#|^$)/ }.should == []
   end
 
   it { should have_cron__job_resource_count(0) }
@@ -82,10 +98,37 @@ describe 'cron' do
     let(:params) {{ :crond_args => 'foo' }}
 
     it do
-      content = subject.resource('file', '/etc/sysconfig/crond').send(:parameters)[:content]
+      content = catalogue.resource('file', '/etc/sysconfig/crond').send(:parameters)[:content]
       content.split("\n").reject { |c| c =~ /(^#|^$)/ }.should == [
         'CRONDARGS=foo',
       ]
+    end
+  end
+
+  context 'when cron_allow => ["foo", "bar"]' do
+    let(:params) {{ :cron_allow => ["foo", "bar"] }}
+
+    it do
+      should contain_file('/etc/cron.allow').with({
+        :ensure => 'file',
+        :owner  => 'root',
+        :group  => 'root',
+        :mode   => '0600',
+      })
+    end
+
+    it "should contain /etc/cron.allow with valid contents" do
+      content = catalogue.resource('file', '/etc/cron.allow').send(:parameters)[:content]
+      content.split("\n").reject { |c| c =~ /(^#|^$)/ }.should == ["foo","bar"]
+    end
+  end
+
+  context 'when cron_deny => ["foo", "bar"]' do
+    let(:params) {{ :cron_deny => ["foo", "bar"] }}
+
+    it "should contain /etc/cron.deny with valid contents" do
+      content = catalogue.resource('file', '/etc/cron.deny').send(:parameters)[:content]
+      content.split("\n").reject { |c| c =~ /(^#|^$)/ }.should == ["foo","bar"]
     end
   end
 end
