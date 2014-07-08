@@ -63,8 +63,13 @@ describe 'cron' do
   it { should have_cron__job_resource_count(0) }
 
   context 'EL5 contains vixie-cron' do
-    let(:facts) { default_facts.merge({ :operatingsystemrelease => '5.9' }) }
+    let(:facts) { default_facts.merge({ :operatingsystemmajrelease => '5' }) }
     it { should contain_package('cron').with_name('vixie-cron') }
+  end
+
+  context 'EL7 contains cronie' do
+    let(:facts) { default_facts.merge({ :operatingsystemmajrelease => '7' }) }
+    it { should contain_package('cron').with_name('cronie') }
   end
 
   context 'with job_instances => defined' do

@@ -24,9 +24,10 @@ class cron::params {
 
   case $::osfamily {
     'RedHat': {
-      $package_name             = $::operatingsystemrelease ? {
-        /5.\d/ => 'vixie-cron',
-        /6.\d/ => 'cronie',
+      if $::operatingsystemmajrelease < 6 {
+        $package_name           = 'vixie-cron'
+      } else {
+        $package_name           = 'cronie'
       }
       $service_name             = 'crond'
       $service_hasstatus        = true
