@@ -31,7 +31,7 @@ shared_context :defaults do
       :osfamily                   => 'RedHat',
       :operatingsystem            => 'CentOS',
       :operatingsystemrelease     => '6.4',
-      :operatingsystemmajrelease  => '6',
+#      :operatingsystemmajrelease  => '6',
       :architecture               => 'x86_64',
     }
   end
