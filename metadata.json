@@ -1,0 +1,28 @@
+{
+  "name": "treydock-cron",
+  "version": "1.0.0",
+  "author": "treydock",
+  "summary": "Puppet module to manage crond",
+  "license": "Apache-2.0",
+  "source": "git://github.com/treydock/puppet-cron.git",
+  "issues_url": "https://github.com/treydock/puppet-cron/issues",
+  "project_page": "https://github.com/treydock/puppet-cron",
+  "tags": [ "cron" ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [ "5", "6", "7" ]
+    },
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [ "5", "6", "7" ]
+    },
+    {
+      "operatingsystem": "Scientific",
+      "operatingsystemrelease": [ "5", "6", "7" ]
+    }
+  ],
+  "dependencies": [
+    { "name": "puppetlabs/stdlib", "version_requirement": ">= 3.2.0 <5.0.0" }
+  ]
+}
